@@ -4,6 +4,7 @@ from rest_framework_simplejwt.views import TokenRefreshView
 from .views import (
     AdminOrderListView,
     AdminOrderStatusUpdateView,
+    OrderStreamView,
     CartItemDetailView,
     CartItemListCreateView,
     ClearCartView,
@@ -33,6 +34,7 @@ urlpatterns = [
     path("cart/<int:pk>/", CartItemDetailView.as_view(), name="cart_item_detail"),
     path("cart/clear/", ClearCartView.as_view(), name="clear_cart"),
     path("orders/place/", PlaceOrderView.as_view(), name="place_order"),
+    path("orders/stream/", OrderStreamView.as_view(), name="order_stream"),
     path("orders/my/", MyOrdersView.as_view(), name="my_orders"),
     path("orders/", AdminOrderListView.as_view(), name="admin_orders"),
     path("orders/<int:pk>/status/", AdminOrderStatusUpdateView.as_view(), name="admin_order_status"),

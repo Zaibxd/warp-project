@@ -1,19 +1,114 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── CSS custom properties ─── */
 :root {
-  font-family: "Inter", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  color: #2e2620;
-  background: #f8f4ef;
+  --espresso:   #1a0f0a;
+  --roast:      #3d1f10;
+  --caramel:    #c17f3e;
+  --cream:      #f5ede0;
+  --latte:      #e8d5b7;
+  --foam:       #faf6f0;
+  --bark:       #6b3a20;
+  --mist:       rgba(193, 127, 62, 0.12);
 }
 
-* {
-  box-sizing: border-box;
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply antialiased;
+    font-family: 'DM Sans', sans-serif;
+    background: var(--foam);
+    color: var(--espresso);
+  }
 }
 
-body {
-  margin: 0;
-  min-height: 100vh;
-  background: #f8f4ef;
+/* ─── Shared button / input primitives (used by other pages/components) ─── */
+@layer components {
+  .btn-base {
+    @apply px-4 py-2 rounded-full font-medium
+           transition-all duration-300 ease-out
+           focus:outline-none focus:ring-2 focus:ring-offset-2;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  /* primary = espresso fill → caramel on hover */
+  .btn-primary {
+    @apply btn-base text-white
+           hover:shadow-lg hover:scale-105 active:scale-95
+           focus:ring-yellow-700;
+    background: var(--roast);
+  }
+  .btn-primary:hover { background: var(--caramel); }
+
+  /* secondary = ghost ring */
+  .btn-secondary {
+    @apply btn-base border text-sm
+           hover:scale-105 active:scale-95;
+    border-color: var(--latte);
+    color: var(--bark);
+  }
+  .btn-secondary:hover {
+    border-color: var(--caramel);
+    color: var(--caramel);
+  }
+
+  /* danger */
+  .btn-danger {
+    @apply btn-base text-white
+           hover:shadow-lg hover:scale-105 active:scale-95
+           focus:ring-red-500;
+    background: linear-gradient(to right, #ef4444, #dc2626);
+  }
+
+  .btn-primary:disabled,
+  .btn-secondary:disabled,
+  .btn-danger:disabled {
+    @apply opacity-50 cursor-not-allowed hover:scale-100 hover:shadow-none;
+  }
+
+  /* input */
+  .input-base {
+    @apply w-full px-4 py-2 border rounded-full
+           focus:outline-none focus:ring-2 focus:border-transparent
+           transition-all duration-300;
+    border-color: var(--latte);
+    background: white;
+    color: var(--espresso);
+    font-family: 'DM Sans', sans-serif;
+  }
+  .input-base:focus {
+    --tw-ring-color: rgba(193, 127, 62, 0.35);
+    border-color: var(--caramel);
+  }
+
+  /* card (used by ProductCard and others) */
+  .card {
+    @apply bg-white rounded-2xl border transition-all duration-300;
+    border-color: rgba(193, 127, 62, 0.12);
+  }
+  .card:hover {
+    @apply shadow-lg;
+    transform: translateY(-5px);
+  }
 }
 
-#root {
-  min-height: 100vh;
+@layer utilities {
+  .smooth-transition { @apply transition-all duration-300 ease-out; }
+  .glass-effect      { @apply bg-white/80 backdrop-blur-md; }
+
+  /* keep gradient utilities so other components that use them don't break */
+  .gradient-primary   { background: linear-gradient(to right, var(--roast), var(--caramel)); }
+  .gradient-secondary { background: linear-gradient(to right, #0d9488, #06b6d4); }
+
+  /* Playfair helper */
+  .font-display {
+    font-family: 'Playfair Display', Georgia, serif;
+  }
 }

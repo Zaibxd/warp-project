@@ -28,35 +28,49 @@ export default function LoginPage() {
   };
 
   return (
-    <section className="panel auth-card">
-      <h2>Login</h2>
-      {error && <div className="alert alert-error">{error}</div>}
-      <form className="form-grid" onSubmit={handleSubmit}>
-        <div className="field">
-          <label htmlFor="username">Username</label>
-          <input id="username" name="username" value={formData.username} onChange={handleChange} required />
-        </div>
-        <div className="field">
-          <label htmlFor="password">Password</label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <button type="submit" className="btn btn-primary" disabled={loading}>
-          {loading ? "Signing in..." : "Login"}
-        </button>
-      </form>
-      <p>
-        Don&apos;t have an account?{" "}
-        <Link className="muted-link" to="/signup">
-          Create one
-        </Link>
-      </p>
+    <section className="min-h-[calc(100vh-120px)] flex items-center justify-center py-8 animate-fadeIn">
+      <div className="max-w-md mx-auto bg-white rounded-xl shadow-lg p-8 border border-gray-200 w-full">
+        <h2 className="text-3xl font-bold text-gray-900 mb-6">Login</h2>
+        {error && (
+          <div className="mb-4 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg text-sm">
+            {error}
+          </div>
+        )}
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <div>
+            <label htmlFor="username" className="block text-sm font-semibold text-gray-700 mb-2">Username</label>
+            <input
+              id="username"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              className="input-base"
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              value={formData.password}
+              onChange={handleChange}
+              className="input-base"
+              required
+            />
+          </div>
+          <button type="submit" className="btn-primary w-full" disabled={loading}>
+            {loading ? "Signing in..." : "Login"}
+          </button>
+        </form>
+        <p className="mt-6 text-center text-sm text-gray-600">
+          Don&apos;t have an account?{" "}
+          <Link className="font-semibold text-purple-600 hover:text-purple-700 transition-colors" to="/signup">
+            Create one
+          </Link>
+        </p>
+      </div>
     </section>
   );
 }

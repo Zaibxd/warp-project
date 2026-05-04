@@ -81,40 +81,43 @@ export default function AdminProductsPage() {
   };
 
   return (
-    <section className="admin-grid">
-      <div className="panel">
-        <h2 className="section-title">Admin Product Management</h2>
-        {error && <div className="alert alert-error">{error}</div>}
-        {notice && <div className="alert alert-success">{notice}</div>}
-        <form className="form-grid" onSubmit={handleSubmit}>
-          <div className="field">
-            <label htmlFor="name">Product Name</label>
+    <section className="grid md:grid-cols-2 gap-6 animate-fadeIn">
+      <div className="card">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">Admin Product Management</h2>
+        {error && <div className="mb-4 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">{error}</div>}
+        {notice && <div className="mb-4 bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-lg">{notice}</div>}
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <div>
+            <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">Product Name</label>
             <input
               id="name"
               name="name"
               value={formData.name}
               onChange={handleChange}
+              className="input-base"
               required
             />
           </div>
 
-          <div className="field">
-            <label htmlFor="description">Description</label>
+          <div>
+            <label htmlFor="description" className="block text-sm font-semibold text-gray-700 mb-2">Description</label>
             <textarea
               id="description"
               name="description"
               value={formData.description}
               onChange={handleChange}
+              className="input-base min-h-20"
             />
           </div>
 
-          <div className="field">
-            <label htmlFor="category">Category</label>
+          <div>
+            <label htmlFor="category" className="block text-sm font-semibold text-gray-700 mb-2">Category</label>
             <select
               id="category"
               name="category"
               value={formData.category}
               onChange={handleChange}
+              className="input-base"
             >
               <option value="coffee">Coffee</option>
               <option value="tea">Tea</option>
@@ -123,8 +126,8 @@ export default function AdminProductsPage() {
             </select>
           </div>
 
-          <div className="field">
-            <label htmlFor="price">Price</label>
+          <div>
+            <label htmlFor="price" className="block text-sm font-semibold text-gray-700 mb-2">Price</label>
             <input
               id="price"
               name="price"
@@ -132,63 +135,64 @@ export default function AdminProductsPage() {
               step="0.01"
               value={formData.price}
               onChange={handleChange}
+              className="input-base"
               required
             />
           </div>
 
-          <div className="field">
-            <label htmlFor="image_url">Image URL</label>
+          <div>
+            <label htmlFor="image_url" className="block text-sm font-semibold text-gray-700 mb-2">Image URL</label>
             <input
               id="image_url"
               name="image_url"
               value={formData.image_url}
               onChange={handleChange}
+              className="input-base"
             />
           </div>
 
-          <div className="inline-form">
+          <div className="flex items-center gap-2">
             <input
               id="is_available"
               name="is_available"
               type="checkbox"
               checked={formData.is_available}
               onChange={handleChange}
+              className="w-4 h-4 text-purple-600 rounded"
             />
-            <label htmlFor="is_available">Available</label>
+            <label htmlFor="is_available" className="text-sm font-medium text-gray-700">Available</label>
           </div>
 
-          <button type="submit" className="btn btn-primary">
+          <button type="submit" className="btn-primary w-full">
             Add Product
           </button>
         </form>
       </div>
 
-      <div className="panel">
-        <h3 className="section-title">Current Products</h3>
+      <div className="card">
+        <h3 className="text-2xl font-bold text-gray-900 mb-6">Current Products</h3>
         {loading ? (
-          <p className="status-message">Loading products...</p>
+          <p className="text-center py-8 text-gray-600">Loading products...</p>
         ) : (
-          <div className="list-stack">
+          <div className="space-y-3 max-h-96 overflow-y-auto">
             {products.map((product) => (
-              <article key={product.id} className="panel admin-product-row">
-                <div className="row-between">
-                  <strong>{product.name}</strong>
-                  <span className="price">
-                    ${Number(product.price).toFixed(2)}
-                  </span>
+              <article key={product.id} className="border border-gray-200 rounded-lg p-3 hover:shadow-soft transition-all duration-300">
+                <div className="flex justify-between items-start gap-2 mb-2">
+                  <strong className="text-gray-900">{product.name}</strong>
+                  <span className="font-bold text-purple-700">${Number(product.price).toFixed(2)}</span>
                 </div>
-                <p>{product.description}</p>
-                <div className="btn-group">
+                <p className="text-sm text-gray-600 mb-3">{product.description}</p>
+                <div className="flex gap-2">
                   <button
                     type="button"
-                    className="btn btn-secondary"
+                    className="btn-secondary flex-1 text-sm"
                     onClick={() => toggleAvailability(product)}
                   >
-                    Mark as {product.is_available ? "Unavailable" : "Available"}
+                    {product.is_available ? "Mark Unavailable" : "Mark Available"}
                   </button>
                   <button
                     type="button"
-                    className="btn btn-danger"
+                    className="btn-danger flex-1 text-sm"
                     onClick={() => deleteProduct(product.id)}
                   >
                     Delete

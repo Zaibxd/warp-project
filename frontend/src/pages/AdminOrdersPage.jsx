@@ -46,37 +46,35 @@ export default function AdminOrdersPage() {
   };
 
   return (
-    <section className="panel">
-      <h2 className="section-title">Admin Orders</h2>
-      {error && <div className="alert alert-error">{error}</div>}
+    <section className="card animate-fadeIn">
+      <h2 className="text-3xl font-bold text-gray-900 mb-6">Admin Orders</h2>
+      {error && <div className="mb-4 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">{error}</div>}
 
       {loading ? (
-        <p className="status-message">Loading orders...</p>
+        <p className="text-center py-12 text-gray-600">Loading orders...</p>
       ) : !orders.length ? (
-        <p className="status-message">No orders available.</p>
+        <p className="text-center py-12 text-gray-600">No orders available.</p>
       ) : (
-        <div className="list-stack">
+        <div className="space-y-4">
           {orders.map((order) => (
-            <article key={order.id} className="panel order-card">
-              <div className="row-between">
-                <strong>Order #{order.id}</strong>
-                <span className="price">
-                  ${Number(order.total_amount).toFixed(2)}
-                </span>
+            <article key={order.id} className="card hover:shadow-md-soft p-4 transition-all duration-300">
+              <div className="flex justify-between items-center gap-4 mb-2">
+                <strong className="text-lg text-gray-900">Order #{order.id}</strong>
+                <span className="font-bold text-purple-700">${Number(order.total_amount).toFixed(2)}</span>
               </div>
-              <small>{new Date(order.created_at).toLocaleString()}</small>
-              <ul>
+              <p className="text-sm text-gray-600 mb-3">{new Date(order.created_at).toLocaleString()}</p>
+              <ul className="mb-4 pl-4 space-y-1">
                 {order.items.map((item) => (
-                  <li key={item.id}>
-                    {item.product_name} x {item.quantity}
+                  <li key={item.id} className="text-sm text-gray-700">
+                    {item.product_name} x <span className="font-bold">{item.quantity}</span>
                   </li>
                 ))}
               </ul>
-              <div className="inline-form">
-                <label htmlFor={`status-${order.id}`}>Status</label>
+              <div className="flex items-center gap-3">
+                <label htmlFor={`status-${order.id}`} className="font-medium text-gray-700">Status:</label>
                 <select
                   id={`status-${order.id}`}
-                  className="small-select"
+                  className="input-base flex-1"
                   value={order.status}
                   onChange={(event) =>
                     updateOrderStatus(order.id, event.target.value)

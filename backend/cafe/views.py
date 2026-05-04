@@ -1,11 +1,19 @@
+import queue
+
 from django.db import transaction
+from django.http import HttpResponse, StreamingHttpResponse
+from django.views import View
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.exceptions import AuthenticationFailed
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .models import CartItem, DeliveryAddress, Order, OrderItem, Product
+from .order_stream_bus import subscribe as subscribe_order_stream, unsubscribe as unsubscribe_order_stream
 from .permissions import IsAdminOrReadOnly
 from .serializers import (
     CartItemSerializer,
@@ -202,9 +210,44 @@ class PlaceOrderView(APIView):
         return Response(OrderSerializer(order).data, status=status.HTTP_201_CREATED)
 
 
+class OrderStreamView(View):
+    """SSE-style stream. Uses Django View (not DRF APIView) so Accept: text/event-stream is not rejected with 406."""
+
+    def get(self, request, *args, **kwargs):
+        try:
+            auth_result = JWTAuthentication().authenticate(request)
+        except (InvalidToken, TokenError, AuthenticationFailed):
+            return HttpResponse(status=401)
+        if not auth_result:
+            return HttpResponse(status=401)
+        user, _token = auth_result
+
+        def event_stream():
+            q = subscribe_order_stream(user)
+            try:
+                yield "retry: 15000\n\n"
+                while True:
+                    try:
+                        chunk = q.get(timeout=25)
+                        yield chunk
+                    except queue.Empty:
+                        yield ": ping\n\n"
+            finally:
+                unsubscribe_order_stream(user, q)
+
+        response = StreamingHttpResponse(
+            event_stream(),
+            content_type="text/event-stream; charset=utf-8",
+        )
+        response["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response["X-Accel-Buffering"] = "no"
+        return response
+
+
 class MyOrdersView(generics.ListAPIView):
     serializer_class = OrderSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = None
     filterset_fields = ["status"]
     search_fields = ["status"]
 
