@@ -13,6 +13,7 @@ import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import OrdersPage from "./pages/OrdersPage";
 import ProfilePage from "./pages/ProfilePage";
+import PaymentPage from "./pages/PaymentPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import SignupPage from "./pages/SignupPage";
 
@@ -38,6 +39,14 @@ function App() {
                       element={
                         <ProtectedRoute>
                           <ProfilePage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/payment"
+                      element={
+                        <ProtectedRoute>
+                          <PaymentPage />
                         </ProtectedRoute>
                       }
                     />

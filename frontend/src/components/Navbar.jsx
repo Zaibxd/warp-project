@@ -79,7 +79,14 @@ function BeanLogo() {
 /* ─── cart icon ─── */
 function CartIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+    >
       <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
       <line x1="3" y1="6" x2="21" y2="6" />
       <path d="M16 10a4 4 0 01-8 0" />
@@ -90,8 +97,19 @@ function CartIcon() {
 /* ─── bell icon ─── */
 function BellIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+      />
     </svg>
   );
 }
@@ -156,7 +174,8 @@ export default function Navbar() {
   useEffect(() => {
     if (!bellOpen) return;
     const handle = (e) => {
-      if (bellRef.current && !bellRef.current.contains(e.target)) setBellOpen(false);
+      if (bellRef.current && !bellRef.current.contains(e.target))
+        setBellOpen(false);
     };
     document.addEventListener("mousedown", handle);
     return () => document.removeEventListener("mousedown", handle);
@@ -169,7 +188,10 @@ export default function Navbar() {
     navigate("/login");
   };
 
-  const close = () => { setMobileOpen(false); setBellOpen(false); };
+  const close = () => {
+    setMobileOpen(false);
+    setBellOpen(false);
+  };
 
   return (
     <>
@@ -292,7 +314,7 @@ export default function Navbar() {
                 letterSpacing: "0.01em",
               }}
             >
-              Brew Haven
+              Suns Out Buns Out
             </span>
           </Link>
 
@@ -306,18 +328,26 @@ export default function Navbar() {
             }}
             className="max-md:hidden"
           >
-            <BrewNavLink to="/" onClick={close}>Menu</BrewNavLink>
+            <BrewNavLink to="/" onClick={close}>
+              Menu
+            </BrewNavLink>
 
             {isAuthenticated && (
               <>
-                <BrewNavLink to="/orders" onClick={close}>Orders</BrewNavLink>
-                <BrewNavLink to="/profile" onClick={close}>Profile</BrewNavLink>
+                <BrewNavLink to="/orders" onClick={close}>
+                  Orders
+                </BrewNavLink>
+                <BrewNavLink to="/profile" onClick={close}>
+                  Profile
+                </BrewNavLink>
               </>
             )}
 
             {isAdmin && (
               <>
-                <BrewNavLink to="/admin/products" onClick={close}>Products</BrewNavLink>
+                <BrewNavLink to="/admin/products" onClick={close}>
+                  Products
+                </BrewNavLink>
                 <NavLink
                   to="/admin/orders"
                   onClick={close}
@@ -330,14 +360,19 @@ export default function Navbar() {
                     background: isActive ? "#3d1f10" : "transparent",
                   })}
                 >
-                  Admin Orders
+                  Orders Requested
                   {adminOrderTotal !== null && adminOrderTotal > 0 && (
-                    <span style={{
-                      background: "#d97706", color: "white",
-                      fontSize: ".6rem", fontWeight: 700,
-                      padding: "1px 6px", borderRadius: "2rem",
-                      lineHeight: "16px",
-                    }}>
+                    <span
+                      style={{
+                        background: "#d97706",
+                        color: "white",
+                        fontSize: ".6rem",
+                        fontWeight: 700,
+                        padding: "1px 6px",
+                        borderRadius: "2rem",
+                        lineHeight: "16px",
+                      }}
+                    >
                       {adminOrderTotal > 999 ? "999+" : adminOrderTotal}
                     </span>
                   )}
@@ -348,7 +383,9 @@ export default function Navbar() {
             {/* auth */}
             {!isAuthenticated ? (
               <>
-                <BrewNavLink to="/login" onClick={close}>Login</BrewNavLink>
+                <BrewNavLink to="/login" onClick={close}>
+                  Login
+                </BrewNavLink>
                 <NavLink
                   to="/signup"
                   onClick={close}
@@ -357,14 +394,22 @@ export default function Navbar() {
                     background: "#3d1f10",
                     color: "#faf6f0",
                   })}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "#c17f3e"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "#3d1f10"; }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = "#c17f3e";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = "#3d1f10";
+                  }}
                 >
                   Sign Up
                 </NavLink>
               </>
             ) : (
-              <button type="button" className="brew-logout" onClick={handleLogout}>
+              <button
+                type="button"
+                className="brew-logout"
+                onClick={handleLogout}
+              >
                 Logout
               </button>
             )}
@@ -376,16 +421,26 @@ export default function Navbar() {
               <>
                 {/* bell */}
                 <div style={{ position: "relative" }} ref={bellRef}>
-                  <button type="button" className="brew-icon-btn" aria-label="Order updates" onClick={() => setBellOpen((v) => !v)}>
+                  <button
+                    type="button"
+                    className="brew-icon-btn"
+                    aria-label="Order updates"
+                    onClick={() => setBellOpen((v) => !v)}
+                  >
                     <BellIcon />
                     <Badge count={unreadOrderCount} color="#e05252" />
                   </button>
-                  {bellOpen && <BellDropdown
-                    notifications={orderNotifications}
-                    onMarkRead={markOrderNotificationRead}
-                    onMarkAll={markAllOrderNotificationsRead}
-                    onNavigate={(path) => { navigate(path); close(); }}
-                  />}
+                  {bellOpen && (
+                    <BellDropdown
+                      notifications={orderNotifications}
+                      onMarkRead={markOrderNotificationRead}
+                      onMarkAll={markAllOrderNotificationsRead}
+                      onNavigate={(path) => {
+                        navigate(path);
+                        close();
+                      }}
+                    />
+                  )}
                 </div>
                 {/* cart */}
                 <div style={{ position: "relative" }}>
@@ -393,7 +448,10 @@ export default function Navbar() {
                     type="button"
                     className="brew-icon-btn"
                     aria-label="Cart"
-                    onClick={() => { navigate("/cart"); close(); }}
+                    onClick={() => {
+                      navigate("/cart");
+                      close();
+                    }}
                   >
                     <CartIcon />
                     <Badge count={totalQuantity} />
@@ -408,7 +466,9 @@ export default function Navbar() {
               onClick={() => setMobileOpen((v) => !v)}
               aria-label="Toggle menu"
             >
-              <span /><span /><span />
+              <span />
+              <span />
+              <span />
             </button>
           </div>
         </div>
@@ -428,33 +488,61 @@ export default function Navbar() {
             }}
             className="md:hidden"
           >
-            <MobileLink to="/" onClick={close}>Menu</MobileLink>
+            <MobileLink to="/" onClick={close}>
+              Menu
+            </MobileLink>
 
             {isAuthenticated && (
               <>
                 <MobileLink to="/cart" onClick={close}>
-                  Cart {totalQuantity > 0 && <span style={{ color: "#c17f3e", fontWeight: 600 }}>({totalQuantity})</span>}
+                  Cart{" "}
+                  {totalQuantity > 0 && (
+                    <span style={{ color: "#c17f3e", fontWeight: 600 }}>
+                      ({totalQuantity})
+                    </span>
+                  )}
                 </MobileLink>
-                <MobileLink to="/orders" onClick={close}>My Orders</MobileLink>
-                <MobileLink to="/profile" onClick={close}>Profile</MobileLink>
+                <MobileLink to="/orders" onClick={close}>
+                  My Orders
+                </MobileLink>
+                <MobileLink to="/profile" onClick={close}>
+                  Profile
+                </MobileLink>
               </>
             )}
 
             {isAdmin && (
               <>
-                <MobileLink to="/admin/products" onClick={close}>Admin Products</MobileLink>
+                <MobileLink to="/admin/products" onClick={close}>
+                  Admin Products
+                </MobileLink>
                 <MobileLink to="/admin/orders" onClick={close}>
-                  Admin Orders {adminOrderTotal > 0 && <span style={{ color: "#d97706", fontWeight: 600 }}>({adminOrderTotal})</span>}
+                  Orders Requested{" "}
+                  {adminOrderTotal > 0 && (
+                    <span style={{ color: "#d97706", fontWeight: 600 }}>
+                      ({adminOrderTotal})
+                    </span>
+                  )}
                 </MobileLink>
               </>
             )}
 
-            <div style={{ height: 1, background: "rgba(193,127,62,.15)", margin: "0.5rem 0" }} />
+            <div
+              style={{
+                height: 1,
+                background: "rgba(193,127,62,.15)",
+                margin: "0.5rem 0",
+              }}
+            />
 
             {!isAuthenticated ? (
               <>
-                <MobileLink to="/login" onClick={close}>Login</MobileLink>
-                <MobileLink to="/signup" onClick={close}>Sign Up</MobileLink>
+                <MobileLink to="/login" onClick={close}>
+                  Login
+                </MobileLink>
+                <MobileLink to="/signup" onClick={close}>
+                  Sign Up
+                </MobileLink>
               </>
             ) : (
               <button
@@ -493,7 +581,9 @@ function MobileLink({ to, onClick, children }) {
         fontWeight: isActive ? 500 : 400,
         padding: "0.6rem 0.25rem",
         borderRadius: 0,
-        borderBottom: isActive ? "1px solid rgba(193,127,62,.3)" : "1px solid transparent",
+        borderBottom: isActive
+          ? "1px solid rgba(193,127,62,.3)"
+          : "1px solid transparent",
         textTransform: "uppercase",
         letterSpacing: "0.07em",
         fontSize: ".82rem",
@@ -508,20 +598,39 @@ function MobileLink({ to, onClick, children }) {
 function BellDropdown({ notifications, onMarkRead, onMarkAll, onNavigate }) {
   return (
     <div className="bell-dropdown">
-      <div style={{
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "0.75rem 1rem",
-        borderBottom: "1px solid rgba(193,127,62,.12)",
-        background: "rgba(193,127,62,.05)",
-      }}>
-        <span style={{ fontSize: ".82rem", fontWeight: 500, color: "#3d1f10", letterSpacing: ".04em", textTransform: "uppercase" }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "0.75rem 1rem",
+          borderBottom: "1px solid rgba(193,127,62,.12)",
+          background: "rgba(193,127,62,.05)",
+        }}
+      >
+        <span
+          style={{
+            fontSize: ".82rem",
+            fontWeight: 500,
+            color: "#3d1f10",
+            letterSpacing: ".04em",
+            textTransform: "uppercase",
+          }}
+        >
           Order Updates
         </span>
         {notifications.length > 0 && (
           <button
             type="button"
             onClick={onMarkAll}
-            style={{ fontSize: ".75rem", color: "#c17f3e", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit" }}
+            style={{
+              fontSize: ".75rem",
+              color: "#c17f3e",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              fontFamily: "inherit",
+            }}
           >
             Mark all read
           </button>
@@ -530,29 +639,53 @@ function BellDropdown({ notifications, onMarkRead, onMarkAll, onNavigate }) {
 
       <div style={{ maxHeight: 280, overflowY: "auto" }}>
         {notifications.length === 0 ? (
-          <p style={{ padding: "1.5rem 1rem", fontSize: ".85rem", color: "#9a7060", textAlign: "center", lineHeight: 1.6, fontWeight: 300 }}>
+          <p
+            style={{
+              padding: "1.5rem 1rem",
+              fontSize: ".85rem",
+              color: "#9a7060",
+              textAlign: "center",
+              lineHeight: 1.6,
+              fontWeight: 300,
+            }}
+          >
             No updates yet. We'll notify you when your order status changes.
           </p>
         ) : (
           <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
             {notifications.map((n) => (
-              <li key={n.id} style={{ borderBottom: "1px solid rgba(193,127,62,.08)" }}>
+              <li
+                key={n.id}
+                style={{ borderBottom: "1px solid rgba(193,127,62,.08)" }}
+              >
                 <button
                   type="button"
-                  onClick={() => { onMarkRead(n.id); onNavigate("/orders"); }}
+                  onClick={() => {
+                    onMarkRead(n.id);
+                    onNavigate("/orders");
+                  }}
                   style={{
-                    width: "100%", textAlign: "left",
+                    width: "100%",
+                    textAlign: "left",
                     padding: "0.85rem 1rem",
                     background: n.read ? "transparent" : "rgba(193,127,62,.05)",
-                    border: "none", cursor: "pointer",
-                    fontSize: ".85rem", lineHeight: 1.55,
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: ".85rem",
+                    lineHeight: 1.55,
                     color: n.read ? "#9a7060" : "#3d1f10",
                     fontWeight: n.read ? 300 : 400,
                     fontFamily: "inherit",
                     transition: "background .2s",
                   }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(193,127,62,.08)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = n.read ? "transparent" : "rgba(193,127,62,.05)"; }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = "rgba(193,127,62,.08)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = n.read
+                      ? "transparent"
+                      : "rgba(193,127,62,.05)";
+                  }}
                 >
                   {n.message}
                 </button>
@@ -562,20 +695,28 @@ function BellDropdown({ notifications, onMarkRead, onMarkAll, onNavigate }) {
         )}
       </div>
 
-      <div style={{
-        borderTop: "1px solid rgba(193,127,62,.12)",
-        padding: "0.6rem 1rem",
-        background: "rgba(193,127,62,.04)",
-      }}>
+      <div
+        style={{
+          borderTop: "1px solid rgba(193,127,62,.12)",
+          padding: "0.6rem 1rem",
+          background: "rgba(193,127,62,.04)",
+        }}
+      >
         <button
           type="button"
           onClick={() => onNavigate("/orders")}
           style={{
-            width: "100%", textAlign: "center",
-            background: "none", border: "none", cursor: "pointer",
-            fontSize: ".8rem", fontWeight: 500,
-            letterSpacing: ".05em", textTransform: "uppercase",
-            color: "#c17f3e", fontFamily: "inherit",
+            width: "100%",
+            textAlign: "center",
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            fontSize: ".8rem",
+            fontWeight: 500,
+            letterSpacing: ".05em",
+            textTransform: "uppercase",
+            color: "#c17f3e",
+            fontFamily: "inherit",
             padding: "0.25rem",
           }}
         >

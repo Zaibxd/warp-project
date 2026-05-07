@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../api/client";
 import { useCart } from "../context/CartContext";
 import { useNotification } from "../context/NotificationContext";
@@ -108,8 +108,8 @@ export default function CartPage() {
       const { data } = await api.post("/orders/place/", { delivery_address_id: selectedAddressId, delivery_notes: deliveryNotes });
       seedOrderStatus(data.id, data.status);
       await refreshCart();
-      showSuccess("Order placed successfully!");
-      navigate("/orders");
+      showSuccess("Order placed! Please complete your payment.");
+      navigate(`/payment?orderId=${data.id}`, { state: { order: data } });
     } catch { showError("Could not place order."); }
     finally { setProcessing(false); }
   };
@@ -262,7 +262,7 @@ export default function CartPage() {
                       {addresses.length === 0 ? (
                         <p style={{ fontSize: ".85rem", color: "#6b3a20", lineHeight: 1.6 }}>
                           No addresses saved.{" "}
-                          <a href="/profile" style={{ color: "#c17f3e", textDecoration: "none", fontWeight: 500 }}>Add one →</a>
+                          <Link to="/profile" style={{ color: "#c17f3e", textDecoration: "none", fontWeight: 500 }}>Add one →</Link>
                         </p>
                       ) : (
                         <select

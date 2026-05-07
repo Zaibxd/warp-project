@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../api/client";
 import { useNotification } from "../context/NotificationContext";
 
@@ -50,20 +51,36 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const { showError } = useNotification();
+  const navigate = useNavigate();
+
+  // Orders where payment is still actionable
+  const PAYMENT_PENDING_STATUSES = ["pending"];
+  // Orders that are fully done — no payment action needed
+  const TERMINAL_STATUSES = ["completed", "cancelled"];
 
   useEffect(() => {
+    let cancelled = false;
     (async () => {
       setLoading(true);
       try {
         const { data } = await api.get("/orders/my/");
-        setOrders(data.results || data);
+        if (!cancelled) {
+          setOrders(data.results || data);
+        }
       } catch {
-        showError("Could not fetch your orders.");
+        if (!cancelled) {
+          showError("Could not fetch your orders.");
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     })();
-  }, []);
+    return () => {
+      cancelled = true;
+    };
+  }, [showError]);
 
   return (
     <>
@@ -201,8 +218,11 @@ export default function OrdersPage() {
                   {/* total */}
                   <div style={{
                     display: "flex", justifyContent: "flex-end",
+                    alignItems: "center",
                     paddingTop: ".75rem",
                     borderTop: "1px solid rgba(193,127,62,.14)",
+                    gap: "1rem",
+                    flexWrap: "wrap",
                   }}>
                     <span style={{
                       fontFamily: "'Playfair Display', Georgia, serif",
@@ -210,6 +230,45 @@ export default function OrdersPage() {
                     }}>
                       Total: ${Number(order.total_amount).toFixed(2)}
                     </span>
+
+                    {/* Payment action — only shown when order is not terminal */}
+                    {!TERMINAL_STATUSES.includes(order.status) && (
+                      <button
+                        onClick={() =>
+                          navigate(`/payment?orderId=${order.id}`, { state: { order } })
+                        }
+                        style={{
+                          display: "inline-flex", alignItems: "center", gap: ".4rem",
+                          padding: ".48rem 1.1rem",
+                          borderRadius: "2rem",
+                          border: "none",
+                          cursor: "pointer",
+                          fontFamily: "'DM Sans', sans-serif",
+                          fontSize: ".78rem", fontWeight: 500,
+                          letterSpacing: ".02em",
+                          transition: "all .22s",
+                          // urgent amber for pending, softer for other statuses
+                          background: PAYMENT_PENDING_STATUSES.includes(order.status)
+                            ? "#3d1f10"
+                            : "rgba(193,127,62,.1)",
+                          color: PAYMENT_PENDING_STATUSES.includes(order.status)
+                            ? "#faf6f0"
+                            : "#6b3a20",
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = "#c17f3e"; e.currentTarget.style.color = "#faf6f0"; }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = PAYMENT_PENDING_STATUSES.includes(order.status) ? "#3d1f10" : "rgba(193,127,62,.1)";
+                          e.currentTarget.style.color = PAYMENT_PENDING_STATUSES.includes(order.status) ? "#faf6f0" : "#6b3a20";
+                        }}
+                      >
+                        {/* wallet icon */}
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="2" y="5" width="20" height="14" rx="2"/>
+                          <path d="M16 12h2"/>
+                        </svg>
+                        {PAYMENT_PENDING_STATUSES.includes(order.status) ? "Complete Payment" : "Payment Details"}
+                      </button>
+                    )}
                   </div>
                 </div>
               </article>

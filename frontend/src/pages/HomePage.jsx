@@ -253,10 +253,29 @@ function Dot({ delay }) {
 /* ─── cup SVG ─── */
 function CupIllustration() {
   return (
-    <div style={{ position: "relative", zIndex: 1, animation: "brewFloat 4s ease-in-out infinite" }}>
+    <div
+      style={{
+        position: "relative",
+        zIndex: 1,
+        animation: "brewFloat 4s ease-in-out infinite",
+      }}
+    >
       {/* steam */}
-      <div style={{ position: "absolute", left: "50%", transform: "translateX(-50%)", top: -52, display: "flex", gap: 14 }}>
-        {[{ h: 38, d: 0 }, { h: 26, d: 0.45 }, { h: 34, d: 0.85 }].map((s, i) => (
+      <div
+        style={{
+          position: "absolute",
+          left: "50%",
+          transform: "translateX(-50%)",
+          top: -52,
+          display: "flex",
+          gap: 14,
+        }}
+      >
+        {[
+          { h: 38, d: 0 },
+          { h: 26, d: 0.45 },
+          { h: 34, d: 0.85 },
+        ].map((s, i) => (
           <span
             key={i}
             style={{
@@ -271,19 +290,72 @@ function CupIllustration() {
           />
         ))}
       </div>
-      <svg width="200" height="240" viewBox="0 0 220 260" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <ellipse cx="110" cy="230" rx="88" ry="17" fill="#d4a574" opacity=".35" />
-        <ellipse cx="110" cy="226" rx="76" ry="12" fill="#c8915a" opacity=".3" />
+      <svg
+        width="200"
+        height="240"
+        viewBox="0 0 220 260"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <ellipse
+          cx="110"
+          cy="230"
+          rx="88"
+          ry="17"
+          fill="#d4a574"
+          opacity=".35"
+        />
+        <ellipse
+          cx="110"
+          cy="226"
+          rx="76"
+          ry="12"
+          fill="#c8915a"
+          opacity=".3"
+        />
         <path d="M50 120 Q55 220 110 225 Q165 220 170 120 Z" fill="#7a3e1e" />
         <path d="M50 120 Q55 218 110 222 Q165 218 170 120 Z" fill="#8b4a26" />
         <ellipse cx="110" cy="120" rx="60" ry="12" fill="#9d5830" />
         <ellipse cx="110" cy="120" rx="52" ry="10" fill="#3d1a0a" />
         <ellipse cx="110" cy="120" rx="34" ry="7" fill="#c17f3e" opacity=".7" />
-        <path d="M82 118 Q110 112 138 118" stroke="#e8d5b7" strokeWidth="1.5" strokeLinecap="round" opacity=".6" fill="none" />
-        <path d="M90 121 Q110 116 130 121" stroke="#e8d5b7" strokeWidth="1" strokeLinecap="round" opacity=".4" fill="none" />
-        <path d="M170 140 Q200 140 200 165 Q200 190 170 190" stroke="#7a3e1e" strokeWidth="12" fill="none" strokeLinecap="round" />
-        <path d="M170 140 Q196 140 196 165 Q196 186 170 190" stroke="#9d5830" strokeWidth="6" fill="none" strokeLinecap="round" />
-        <path d="M65 135 Q70 145 72 158" stroke="white" strokeWidth="2" strokeLinecap="round" opacity=".12" fill="none" />
+        <path
+          d="M82 118 Q110 112 138 118"
+          stroke="#e8d5b7"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          opacity=".6"
+          fill="none"
+        />
+        <path
+          d="M90 121 Q110 116 130 121"
+          stroke="#e8d5b7"
+          strokeWidth="1"
+          strokeLinecap="round"
+          opacity=".4"
+          fill="none"
+        />
+        <path
+          d="M170 140 Q200 140 200 165 Q200 190 170 190"
+          stroke="#7a3e1e"
+          strokeWidth="12"
+          fill="none"
+          strokeLinecap="round"
+        />
+        <path
+          d="M170 140 Q196 140 196 165 Q196 186 170 190"
+          stroke="#9d5830"
+          strokeWidth="6"
+          fill="none"
+          strokeLinecap="round"
+        />
+        <path
+          d="M65 135 Q70 145 72 158"
+          stroke="white"
+          strokeWidth="2"
+          strokeLinecap="round"
+          opacity=".12"
+          fill="none"
+        />
       </svg>
     </div>
   );
@@ -303,7 +375,8 @@ const CATS = [
 ══════════════════════════════════════════ */
 export default function HomePage() {
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [initialLoad, setInitialLoad] = useState(true); // blanks grid only once
+  const [filtering, setFiltering] = useState(false); // subtle overlay on filter change
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
   const [addingProductId, setAddingProductId] = useState(null);
@@ -316,7 +389,12 @@ export default function HomePage() {
   const navigate = useNavigate();
 
   const fetchProducts = useCallback(async () => {
-    setLoading(true);
+    // First ever load → show dots. Subsequent filter changes → keep grid, just dim it.
+    if (initialLoad) {
+      // leave initialLoad true so dots show
+    } else {
+      setFiltering(true);
+    }
     try {
       const params = new URLSearchParams();
       if (search) params.append("search", search);
@@ -326,7 +404,8 @@ export default function HomePage() {
     } catch {
       showError("Unable to load menu items right now.");
     } finally {
-      setLoading(false);
+      setInitialLoad(false);
+      setFiltering(false);
     }
   }, [search, category, showError]);
 
@@ -336,7 +415,10 @@ export default function HomePage() {
   }, [fetchProducts]);
 
   const addToCart = async (productId) => {
-    if (!isAuthenticated) { navigate("/login"); return; }
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
     setAddingProductId(productId);
     try {
       await api.post("/cart/", { product_id: productId, quantity: 1 });
@@ -349,10 +431,15 @@ export default function HomePage() {
     }
   };
 
-  const handleClearFilters = () => { setSearch(""); setCategory(""); };
+  const handleClearFilters = () => {
+    setSearch("");
+    setCategory("");
+  };
 
   const scrollToMenu = () =>
-    document.getElementById("menu-section")?.scrollIntoView({ behavior: "smooth" });
+    document
+      .getElementById("menu-section")
+      ?.scrollIntoView({ behavior: "smooth" });
 
   return (
     <>
@@ -398,8 +485,9 @@ export default function HomePage() {
           </h1>
 
           <p style={S.heroBody}>
-            From the misty highlands of Ethiopia to your hands — we trace every bean,
-            roast every batch with care, and brew each cup as if it&rsquo;s the very first.
+            From the misty highlands of Ethiopia to your hands — we trace every
+            bean, roast every batch with care, and brew each cup as if
+            it&rsquo;s the very first.
           </p>
 
           <div style={S.heroActions}>
@@ -413,21 +501,27 @@ export default function HomePage() {
             <button
               className="brew-btn-ghost"
               style={S.btnGhost}
-              onClick={() => navigate("/about")}
+              onClick={() =>
+                document
+                  .getElementById("story-section")
+                  ?.scrollIntoView({ behavior: "smooth" })
+              }
             >
               Our Story
             </button>
           </div>
 
           <div style={S.heroStats}>
-            {[["48+", "Origin Beans"], ["12yr", "Roasting Craft"], ["5★", "Customer Love"]].map(
-              ([num, lbl]) => (
-                <div key={lbl}>
-                  <div style={S.statNum}>{num}</div>
-                  <div style={S.statLabel}>{lbl}</div>
-                </div>
-              )
-            )}
+            {[
+              ["48+", "Origin Beans"],
+              ["12yr", "Roasting Craft"],
+              ["5★", "Customer Love"],
+            ].map(([num, lbl]) => (
+              <div key={lbl}>
+                <div style={S.statNum}>{num}</div>
+                <div style={S.statLabel}>{lbl}</div>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -454,7 +548,8 @@ export default function HomePage() {
               width: 380,
               height: 380,
               borderRadius: "50%",
-              background: "radial-gradient(circle, rgba(193,127,62,.18) 0%, transparent 70%)",
+              background:
+                "radial-gradient(circle, rgba(193,127,62,.18) 0%, transparent 70%)",
               animation: "brewFloat 5s ease-in-out infinite",
             }}
           />
@@ -463,7 +558,7 @@ export default function HomePage() {
       </section>
 
       {/* ══ STORY BAND ══ */}
-      <section style={S.storySec}>
+      <section id="story-section" style={S.storySec}>
         {/* wave top */}
         <div
           style={{
@@ -478,24 +573,59 @@ export default function HomePage() {
         />
         <div style={S.storyInner}>
           <blockquote style={S.storyQuote}>
-            <span style={{ color: "#c17f3e", fontSize: "3.5rem", lineHeight: 0, verticalAlign: "-.45em", marginRight: ".1em" }}>&ldquo;</span>
-            We don&rsquo;t just serve coffee. We share the story of every farmer, every harvest,
-            every morning.
+            <span
+              style={{
+                color: "#c17f3e",
+                fontSize: "3.5rem",
+                lineHeight: 0,
+                verticalAlign: "-.45em",
+                marginRight: ".1em",
+              }}
+            >
+              &ldquo;
+            </span>
+            We don&rsquo;t just serve coffee. We share the story of every
+            farmer, every harvest, every morning.
           </blockquote>
           <div>
-            <div style={{ fontSize: ".72rem", letterSpacing: ".13em", textTransform: "uppercase", color: "#c17f3e", marginBottom: "1.25rem", fontWeight: 500 }}>
+            <div
+              style={{
+                fontSize: ".72rem",
+                letterSpacing: ".13em",
+                textTransform: "uppercase",
+                color: "#c17f3e",
+                marginBottom: "1.25rem",
+                fontWeight: 500,
+              }}
+            >
               Our Philosophy
             </div>
-            <p style={{ fontSize: "1rem", lineHeight: 1.85, color: "rgba(245,237,224,.7)", marginBottom: "1.1rem", fontWeight: 300 }}>
-              Brew Haven was born from a single obsession: what if every cup you ordered came
-              with the full story of how it got to you? From the altitude of the farm to the
-              hands that picked it, to our roasters who taste each batch a dozen times before
-              it&rsquo;s approved.
+            <p
+              style={{
+                fontSize: "1rem",
+                lineHeight: 1.85,
+                color: "rgba(245,237,224,.7)",
+                marginBottom: "1.1rem",
+                fontWeight: 300,
+              }}
+            >
+              Suns Out Buns Out was born from a single obsession: what if every
+              cup you ordered came with the full story of how it got to you?
+              From the altitude of the farm to the hands that picked it, to our
+              roasters who taste each batch a dozen times before it&rsquo;s
+              approved.
             </p>
-            <p style={{ fontSize: "1rem", lineHeight: 1.85, color: "rgba(245,237,224,.7)", fontWeight: 300 }}>
-              We work directly with 14 farming cooperatives across Ethiopia, Colombia, and
-              Indonesia — paying above fair-trade prices so great coffee remains a sustainable
-              craft, not an extractive industry.
+            <p
+              style={{
+                fontSize: "1rem",
+                lineHeight: 1.85,
+                color: "rgba(245,237,224,.7)",
+                fontWeight: 300,
+              }}
+            >
+              We work directly with 14 farming cooperatives across Ethiopia,
+              Colombia, and Indonesia — paying above fair-trade prices so great
+              coffee remains a sustainable craft, not an extractive industry.
             </p>
           </div>
         </div>
@@ -505,7 +635,16 @@ export default function HomePage() {
       <section id="menu-section" style={S.menuSec}>
         <div style={S.sectionHead}>
           <h2 style={S.sectionH2}>The Menu</h2>
-          <p style={{ fontSize: "1rem", color: "#6b3a20", fontWeight: 300, maxWidth: 400, margin: "0 auto", lineHeight: 1.7 }}>
+          <p
+            style={{
+              fontSize: "1rem",
+              color: "#6b3a20",
+              fontWeight: 300,
+              maxWidth: 400,
+              margin: "0 auto",
+              lineHeight: 1.7,
+            }}
+          >
             Each item is made to order. No shortcuts, no compromises.
           </p>
         </div>
@@ -515,10 +654,23 @@ export default function HomePage() {
           {/* search */}
           <div style={S.searchWrap}>
             <svg
-              style={{ position: "absolute", left: 13, top: "50%", transform: "translateY(-50%)", opacity: 0.4, pointerEvents: "none" }}
-              width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3d1f10" strokeWidth="2"
+              style={{
+                position: "absolute",
+                left: 13,
+                top: "50%",
+                transform: "translateY(-50%)",
+                opacity: 0.4,
+                pointerEvents: "none",
+              }}
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#3d1f10"
+              strokeWidth="2"
             >
-              <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.35-4.35" />
             </svg>
             <input
               className="brew-search"
@@ -549,29 +701,44 @@ export default function HomePage() {
 
           {/* clear */}
           {(search || category) && (
-            <button className="brew-clear" style={S.clearBtn} onClick={handleClearFilters}>
+            <button
+              className="brew-clear"
+              style={S.clearBtn}
+              onClick={handleClearFilters}
+            >
               ✕ Clear
             </button>
           )}
         </div>
 
         {/* product grid */}
-        {loading ? (
+        {initialLoad ? (
           <div style={S.loadingDots}>
-            <Dot delay={0} /><Dot delay={0.15} /><Dot delay={0.3} />
+            <Dot delay={0} />
+            <Dot delay={0.15} />
+            <Dot delay={0.3} />
           </div>
-        ) : products.length === 0 ? (
+        ) : products.length === 0 && !filtering ? (
           <div style={S.emptyState}>
-            <div style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}>☕</div>
+            <div style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}>
+              ☕
+            </div>
             <p>Nothing found — try a different search or category.</p>
           </div>
         ) : (
-          <div style={S.grid}>
+          <div
+            style={{
+              ...S.grid,
+              opacity: filtering ? 0.45 : 1,
+              transition: "opacity 0.2s ease",
+              pointerEvents: filtering ? "none" : "auto",
+            }}
+          >
             {products.map((product, i) => (
               <div
                 key={product.id}
-                className="brew-card"
-                style={{ animationDelay: `${i * 0.06}s` }}
+                className={initialLoad ? "brew-card" : ""}
+                style={{ animationDelay: initialLoad ? `${i * 0.06}s` : "0s" }}
               >
                 <ProductCard
                   product={product}

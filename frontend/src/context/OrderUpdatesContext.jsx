@@ -1,5 +1,13 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import api, { API_BASE_URL, getStoredAuth } from "../api/client";
 import { useAuth } from "./AuthContext";
 
@@ -12,7 +20,10 @@ function storageKey(userId) {
 }
 
 function newNotificationId() {
-  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+  if (
+    typeof crypto !== "undefined" &&
+    typeof crypto.randomUUID === "function"
+  ) {
     return crypto.randomUUID();
   }
   return `n-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
@@ -28,7 +39,10 @@ function loadPersisted(userId) {
     return parsed
       .filter((n) => n && typeof n.message === "string")
       .map((n) => ({
-        id: typeof n.id === "string" || typeof n.id === "number" ? n.id : newNotificationId(),
+        id:
+          typeof n.id === "string" || typeof n.id === "number"
+            ? n.id
+            : newNotificationId(),
         read: Boolean(n.read),
         createdAt: typeof n.createdAt === "number" ? n.createdAt : Date.now(),
         orderId: n.orderId,
@@ -43,13 +57,15 @@ function loadPersisted(userId) {
 function savePersisted(userId, notifications) {
   if (!userId) return;
   try {
-    const serializable = notifications.map(({ id, read, createdAt, orderId, message }) => ({
-      id,
-      read,
-      createdAt,
-      orderId,
-      message,
-    }));
+    const serializable = notifications.map(
+      ({ id, read, createdAt, orderId, message }) => ({
+        id,
+        read,
+        createdAt,
+        orderId,
+        message,
+      }),
+    );
     localStorage.setItem(storageKey(userId), JSON.stringify(serializable));
   } catch {
     /* storage full or disabled */
@@ -145,28 +161,44 @@ async function consumeOrderEventStream(abortSignal, onJson) {
 
 export function OrderUpdatesProvider({ children }) {
   const { isAuthenticated, isAdmin, user } = useAuth();
-  const [notifications, setNotifications] = useState([]);
+
+  // Lazily seed from localStorage on first render so we never call
+  // setState synchronously inside an effect (avoids cascading-render lint error).
+  const [notifications, setNotifications] = useState(() =>
+    loadPersisted(user?.id ?? null),
+  );
+
+  // Track which user's notifications are currently loaded so we can
+  // reload/clear when the identity changes — without an effect-driven setState.
+  const loadedUserIdRef = useRef(user?.id ?? null);
+
   const snapshotRef = useRef({});
   const [adminOrderTotal, setAdminOrderTotal] = useState(null);
-  const skipNextSaveRef = useRef(false);
 
+  // Sync notifications to the correct user whenever auth/user changes.
+  // We use a ref comparison so the setState only fires when the user
+  // actually changes, not on every render.
+  const userId = user?.id ?? null;
+  if (loadedUserIdRef.current !== userId) {
+    loadedUserIdRef.current = userId;
+    // Calling setState during render (outside effects/handlers) is the
+    // React-approved way to derive state from props/context without an
+    // extra render cycle — React will immediately re-render with the new value.
+    setNotifications(isAuthenticated && userId ? loadPersisted(userId) : []);
+  }
+
+  // Persist to localStorage whenever notifications change, but only for a
+  // logged-in user and only after the initial load (not during the first
+  // render where we just read from storage).
+  const isFirstPersistRef = useRef(true);
   useEffect(() => {
-    if (!isAuthenticated || !user?.id) {
-      setNotifications([]);
+    if (!isAuthenticated || !userId) return;
+    if (isFirstPersistRef.current) {
+      isFirstPersistRef.current = false;
       return;
     }
-    skipNextSaveRef.current = true;
-    setNotifications(loadPersisted(user.id));
-  }, [isAuthenticated, user?.id]);
-
-  useEffect(() => {
-    if (!isAuthenticated || !user?.id) return;
-    if (skipNextSaveRef.current) {
-      skipNextSaveRef.current = false;
-      return;
-    }
-    savePersisted(user.id, notifications);
-  }, [isAuthenticated, user?.id, notifications]);
+    savePersisted(userId, notifications);
+  }, [isAuthenticated, userId, notifications]);
 
   const appendNotification = useCallback((payload) => {
     setNotifications((prev) =>
@@ -178,7 +210,7 @@ export function OrderUpdatesProvider({ children }) {
           ...payload,
         },
         ...prev,
-      ].slice(0, 50)
+      ].slice(0, 50),
     );
   }, []);
 
@@ -187,18 +219,21 @@ export function OrderUpdatesProvider({ children }) {
   }, []);
 
   const markAsRead = useCallback((id) => {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
+    );
   }, []);
 
   const markAllRead = useCallback(() => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
   }, []);
 
+  // ── Only count pending orders so the badge reflects actionable work ──
   const fetchAdminOrderTotal = useCallback(async () => {
     if (!isAdmin) return;
     try {
-      const { data } = await api.get("/orders/?page_size=1");
-      const count = typeof data.count === "number" ? data.count : (data.results || data).length;
+      const { data } = await api.get("/orders/?page_size=1&status=pending");
+      const count = typeof data?.count === "number" ? data.count : 0;
       setAdminOrderTotal(count);
     } catch {
       setAdminOrderTotal(null);
@@ -243,12 +278,25 @@ export function OrderUpdatesProvider({ children }) {
         try {
           await consumeOrderEventStream(ac.signal, (data) => {
             if (!data || typeof data !== "object") return;
-            if (data.kind === "order_status" && data.order_id != null && data.status) {
+            if (
+              data.kind === "order_status" &&
+              data.order_id != null &&
+              data.status
+            ) {
+              const prevStatus = snapshotRef.current[data.order_id];
               snapshotRef.current[data.order_id] = data.status;
+              if (prevStatus === data.status) {
+                return;
+              }
               appendNotification({
                 orderId: data.order_id,
                 message: data.message || `Order #${data.order_id} updated.`,
               });
+              // Re-fetch pending count whenever any order status changes,
+              // so the badge stays accurate in real time.
+              if (isAdmin) {
+                void fetchAdminOrderTotal();
+              }
             } else if (data.kind === "orders_changed" && isAdmin) {
               void fetchAdminOrderTotal();
             }
@@ -272,9 +320,18 @@ export function OrderUpdatesProvider({ children }) {
       cancelled = true;
       ac.abort();
     };
-  }, [isAuthenticated, isAdmin, appendNotification, applyBaselineFromApi, fetchAdminOrderTotal]);
+  }, [
+    isAuthenticated,
+    isAdmin,
+    appendNotification,
+    applyBaselineFromApi,
+    fetchAdminOrderTotal,
+  ]);
 
-  const unreadCount = useMemo(() => notifications.filter((n) => !n.read).length, [notifications]);
+  const unreadCount = useMemo(
+    () => notifications.filter((n) => !n.read).length,
+    [notifications],
+  );
 
   const value = useMemo(
     () => ({
@@ -285,10 +342,21 @@ export function OrderUpdatesProvider({ children }) {
       seedOrderStatus,
       adminOrderTotal,
     }),
-    [notifications, unreadCount, markAsRead, markAllRead, seedOrderStatus, adminOrderTotal]
+    [
+      notifications,
+      unreadCount,
+      markAsRead,
+      markAllRead,
+      seedOrderStatus,
+      adminOrderTotal,
+    ],
   );
 
-  return <OrderUpdatesContext.Provider value={value}>{children}</OrderUpdatesContext.Provider>;
+  return (
+    <OrderUpdatesContext.Provider value={value}>
+      {children}
+    </OrderUpdatesContext.Provider>
+  );
 }
 
 export function useOrderUpdates() {
